@@ -10,22 +10,27 @@ const router = useRouter();
 async function signup() {
     error.value = '';
 
-    const res = await fetch('/users/signup', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            email: inputEmail.value,
-            password: inputPassword.value
-        })
-    });
+    try {
+        const res = await fetch('/users/signup', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                email: inputEmail.value,
+                password: inputPassword.value
+            })
+        });
 
-    const data = await res.json()
-    if (!res.ok) {
-        error.value = data.error
-        return
+        const data = await res.json()
+        if (!res.ok) {
+            error.value = data.error
+            return
+        }
+
+        router.push('/signin')
+    } catch (err) {
+        console.log('Caught an error: ', err);
+        error.value = 'Cannot reach the server. Try again later!';
     }
-
-    router.push('/signin')
 }
 </script>
 
@@ -37,6 +42,7 @@ async function signup() {
             <input
                 type="email"
                 v-model="inputEmail"
+                required
             />
         </label>
         <label>
@@ -44,6 +50,7 @@ async function signup() {
             <input
                 type="password"
                 v-model="inputPassword"
+                required
             />
         </label>
         <button type="submit">Sign up</button>
