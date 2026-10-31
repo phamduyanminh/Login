@@ -35,14 +35,14 @@ async function signin() {
         <label>
             Email: 
             <input
-                :type="email"
+                type="email"
                 v-model="inputEmail"
             />
         </label>
         <label>
             Password: 
             <input
-                :type="password"
+                type="password"
                 v-model="inputPassword"
             />
         </label>
