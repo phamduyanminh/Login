@@ -31,7 +31,7 @@ async function signup() {
 
 <template>
     <h1>Sign Up</h1>
-    <form class="SignupForm">
+    <form class="SignupForm" @submit.prevent="signup">
         <label>
             Email:
             <input

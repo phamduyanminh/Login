@@ -31,7 +31,7 @@ async function signin() {
 
 <template>
     <h1>Sign In</h1>
-    <form class="SigninForm">
+    <form class="SigninForm" @submit.prevent="signin">
         <label>
             Email: 
             <input
@@ -47,6 +47,7 @@ async function signin() {
             />
         </label>
         <button type="submit">Sign in</button>
+        <p v-if="error">{{error}}</p>
         <p>
             Don't have an account
             <RouterLink to="/signup">Sign-up here</RouterLink>
