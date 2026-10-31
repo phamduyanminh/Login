@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/users': 'https://localhost:3000',
+      '/users': 'http://localhost:3000',
     },
   },
   resolve: {
