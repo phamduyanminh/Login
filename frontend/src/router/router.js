@@ -9,14 +9,18 @@ const router = createRouter({
         {path: '/', redirect: '/signup'},
         {path: '/signup', component: Signup},
         {path: '/signin', component: Signin},
-        {path: '/home', component: Home}, 
-        {path: '/home', component: Home, meta: {requiresAuth: true}}
+        {path: '/home', component: Home, meta: {requiresAuth: true}},
     ]
 });
 
-router.beforeEach((to) => {
-    if (to.meta.requiresAuth && !isAuthenticated()) {
-        return '/signin';
+router.beforeEach(async (to) => {
+    if (to.meta.requiresAuth) {
+        try {
+            const res = await fetch('/users/me');
+            if (!res.ok) return 'signin';
+        } catch {
+            return 'signin';
+        }
     }
 });
 
