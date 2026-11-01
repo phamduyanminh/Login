@@ -1,11 +1,33 @@
 import { Router } from 'express';
+import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import ValidCreateUserInput from '../utils/validCreateUserInput.js';
 
 const router = Router();
 const validator = new ValidCreateUserInput();
+const jwt_secret = process.env.JWT_SECRET;
 
-// POST create account
+
+const cookieOptions = {
+    httpOnly: true,
+    sameSite: 'lax', // CSRF protection
+    secure: false,
+    path: '/',
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+}
+
+function requireAuth (req, res, next) {
+    const token = req.cookie?.token;
+    if (!token) return res.status(401).json({error: 'Not Authenticated'});
+    try {
+        req.user = jwt.verify(token, SECRET);
+        next();
+    } catch {
+        return res.status(401).json({error: 'Invalid or expired token'});
+    }
+}
+
+// POST sign up
 router.post("/signup", async (req, res) => {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
@@ -33,7 +55,7 @@ router.post("/signup", async (req, res) => {
     }
 });
 
-// POST login
+// POST sign in 
 router.post("/signin", async (req, res) => {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
@@ -55,6 +77,13 @@ router.post("/signin", async (req, res) => {
             return res.status(401).json({ error: "Incorrect password!" });
         }
 
+        const token = jwt.sign(
+            {userId: user._id, email: user.email},
+            SECRET,
+            {expiredIn: '1d'}
+        );
+        res.cookie('token', token, cookieOptions);
+
         return res.status(200).json({
             message: "Login successful",
             user: {email: user.email}
@@ -63,6 +92,18 @@ router.post("/signin", async (req, res) => {
         return res.status(500).json({ error: "Could not sign in!" });
     }
 });
+
+// GET current user
+router.get("/me", requireAuth, (req, res) => {
+    res.json({user: {email: req.user.email}});
+});
+
+// POST sign out - Clearing cookies
+router.post("/signout", (req, res) => {
+    res.clearCookies('token', cookieOptions);
+    res.status(200).json({message: "Signed out"});
+});
+
 
 export default router;
 
