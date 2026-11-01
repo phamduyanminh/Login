@@ -1,11 +1,11 @@
 <script setup>
-import { RouterLink } from 'vue-router';
+import { useRouter  } from 'vue-router';
 
-const router = RouterLink();
+const router = useRouter();
 
 async function signout() {
     await fetch('/users/signout', {method: POST});
-    router.push('/signin')
+    router.push('/signin');
 }
 
 </script>
@@ -13,9 +13,7 @@ async function signout() {
 <template>
     <header class="home-header">
         <h1>Home</h1>
-        <p>
-            <RouterLink to="/signin">Sign out</RouterLink>
-        </p>
+        <button @click="signout">Sign out</button>
     </header>
 </template>
 

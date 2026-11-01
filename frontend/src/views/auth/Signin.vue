@@ -22,8 +22,8 @@ async function signin() {
 
         const data = await res.json()
         if (!res.ok) {
-            error.value = data.error
-            return
+            error.value = data.error;
+            return;
         }
 
         router.push('/home')
