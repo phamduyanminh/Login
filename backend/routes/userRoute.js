@@ -20,7 +20,7 @@ function requireAuth (req, res, next) {
     const token = req.cookie?.token;
     if (!token) return res.status(401).json({error: 'Not Authenticated'});
     try {
-        req.user = jwt.verify(token, SECRET);
+        req.user = jwt.verify(token, jwt_secret);
         next();
     } catch {
         return res.status(401).json({error: 'Invalid or expired token'});
@@ -79,7 +79,7 @@ router.post("/signin", async (req, res) => {
 
         const token = jwt.sign(
             {userId: user._id, email: user.email},
-            SECRET,
+            jwt_secret,
             {expiredIn: '1d'}
         );
         res.cookie('token', token, cookieOptions);
