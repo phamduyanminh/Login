@@ -6,7 +6,7 @@ import router from "./routes/userRoute.js";
 
 const app = express();
 app.use(express.json());
-app.use(cookieParser);
+app.use(cookieParser());
 app.use("/users", router);
 
 // app.get("/", (req, res) => {
