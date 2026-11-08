@@ -12,7 +12,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/users': 'http://localhost:3000',
+      '/users': process.env.VITE_BACKEND_URL || 'http://localhost:3000',
     },
   },
   resolve: {
