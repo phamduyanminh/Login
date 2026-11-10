@@ -101,7 +101,7 @@ router.get("/me", requireAuth, (req, res) => {
 
 // POST sign out - Clearing cookies
 router.post("/signout", (req, res) => {
-    res.clearCookies('token', cookieOptions);
+    res.clearCookie('token', cookieOptions);
     res.status(200).json({message: "Signed out"});
 });
 

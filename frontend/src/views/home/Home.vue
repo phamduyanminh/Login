@@ -4,7 +4,7 @@ import { useRouter  } from 'vue-router';
 const router = useRouter();
 
 async function signout() {
-    await fetch('/users/signout', {method: POST});
+    await fetch('/users/signout', {method: 'POST'});
     router.push('/signin');
 }
 
