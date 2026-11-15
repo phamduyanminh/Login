@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import UserRole from "./userRole";
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -10,6 +11,11 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        enum: UserRole.values(),
         required: true
     }
 });
