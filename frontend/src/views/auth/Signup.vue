@@ -2,10 +2,15 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router';
 
-const inputEmail = ref('');
-const inputPassword = ref('');
 const error = ref('');
 const router = useRouter();
+const inputEmail = ref('');
+const inputPassword = ref('');
+const selectedRole = ref('');
+const roles = ref([
+  { text: 'Admin', value: 'admin' },
+  { text: 'User', value: 'user' }
+])
 
 async function signup() {
     error.value = '';
@@ -16,7 +21,8 @@ async function signup() {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 email: inputEmail.value,
-                password: inputPassword.value
+                password: inputPassword.value,
+                role: selectedRole.value
             })
         });
 
@@ -53,6 +59,19 @@ async function signup() {
                 required
             />
         </label>
+        <div>
+            <label> Select role: </label>
+            <select v-model="selectedRole" required>
+                <option disabled value="">Please select a role</option>
+                <option 
+                    v-for="role in roles" 
+                    :key="role.value" 
+                    :value="role.value"
+                >
+                    {{ role.text }}
+                </option>
+            </select>
+        </div>
         <button type="submit">Sign up</button>
         <p v-if="error">{{error}}</p>
         <p>
