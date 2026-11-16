@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import UserRole from "./userRole";
+import UserRole from "./userRole.js";
 
 const userSchema = new mongoose.Schema({
     email: {

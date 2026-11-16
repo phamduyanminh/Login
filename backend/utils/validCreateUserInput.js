@@ -1,3 +1,5 @@
+import UserRole from "../models/userRole.js";
+
 class validCreateUserInput {
     static VALLID_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     static VALID_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
@@ -23,6 +25,19 @@ class validCreateUserInput {
         
         if (!validCreateUserInput.VALID_PASSWORD_PATTERN.test(password)) {
             console.error('Invalid password pattern');
+            return false;
+        }
+        return true;
+    }
+
+    validRoleInput (role) {
+        if (!role) {
+            console.error('User role is required');
+            return false;
+        }
+
+        if (!UserRole.isValid(role)) {
+            console.error('Invalid user role!');
             return false;
         }
         return true;

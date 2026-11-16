@@ -27,28 +27,47 @@ function requireAuth (req, res, next) {
     }
 }
 
+function requireRole (...allowedRoles) {
+    return (req, res, next) => {
+        requireAuth (req, res, () => {
+            if (!allowedRoles.includes(req.user.role)) {
+                return res.status(403).json({error: 'Forbidden'});
+            }
+
+            next();
+        });
+    };
+}
+
 // POST sign up
 router.post("/signup", async (req, res) => {
     const email = req.body.email?.trim().toLowerCase();
     const password = req.body.password;
+    const role = req.body.role;
 
     const emailValid = validator.validUsernameInput(email);
     const passwordValid = validator.validPasswordInput(password);
+    const roleValid = validator.validRoleInput(role);
     if (!emailValid || !passwordValid) {
         return res.status(400).json({error: 'Invalid input for email or password!'});
+    }
+
+    if (!roleValid) {
+        return res.status(400).json({error: 'Invalid role!'});
     }
 
     try {
         const existingEmail = await User.findOne({email});
         if (existingEmail) {
-            return res.status(409).json({error: 'Email is already existed!'})
+            return res.status(409).json({error: 'Email is already existed!'});
         }
     
-        const user = new User({email, password});
+        const user = new User({email, password, role});
         await user.save();
         return res.status(201).json({
             _id: user._id,
-            email: user.email
+            email: user.email,
+            role: user.role
         });
     } catch (error) {
         return res.status(500).json({error: 'Could not sign up the account!'})
@@ -78,7 +97,7 @@ router.post("/signin", async (req, res) => {
         }
 
         const token = jwt.sign(
-            {userId: user._id, email: user.email},
+            {userId: user._id, email: user.email, role: user.role},
             jwt_secret,
             {expiresIn: '1d'}
         );
@@ -96,7 +115,7 @@ router.post("/signin", async (req, res) => {
 
 // GET current user
 router.get("/me", requireAuth, (req, res) => {
-    res.json({user: {email: req.user.email}});
+    res.json({user: {email: req.user.email, role: req.user.role}});
 });
 
 // POST sign out - Clearing cookies
