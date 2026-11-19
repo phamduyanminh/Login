@@ -1,26 +1,34 @@
 <script setup>
-import { useRouter  } from 'vue-router';
-
-const router = useRouter();
-
-async function signout() {
-    await fetch('/users/signout', {method: 'POST'});
-    router.push('/signin');
-}
-
+import AppHeader from '@/components/AppHeader.vue';
 </script>
 
 <template>
-    <header class="home-header">
-        <h1>Home</h1>
-        <button @click="signout">Sign out</button>
-    </header>
+    <div class="layout">
+        <AppHeader />
+
+        <main class="content">
+            <h1>Home</h1>
+        </main>
+    </div>
 </template>
 
 <style scoped>
-    .home-header {
-        display: flex;
-        flex-direction: row;
-        gap: 20px;
-    }
+.layout {
+    min-height: 100vh;
+    background: #f5f5f5;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #222;
+}
+
+.content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin: 0;
+    font-size: 22px;
+}
 </style>
