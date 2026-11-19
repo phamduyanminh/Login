@@ -35,44 +35,42 @@ async function signin() {
 </script>
 
 <template>
-    <h1>Sign In</h1>
-    <form class="SigninForm" @submit.prevent="signin">
-        <label>
-            Email: 
-            <input
-                type="email"
-                v-model="inputEmail"
-                required
-            />
-        </label>
-        <label>
-            Password: 
-            <input
-                type="password"
-                v-model="inputPassword"
-                required
-            />
-        </label>
-        <button type="submit">Sign in</button>
-        <p v-if="error">{{error}}</p>
-        <p>
-            Don't have an account
-            <RouterLink to="/signup">Sign-up here</RouterLink>
-        </p>
-    </form>
+    <div class="page">
+        <form class="card" @submit.prevent="signin">
+            <h1>Sign In</h1>
+
+            <div class="field">
+                <label for="signin-email">Email</label>
+                <input
+                    id="signin-email"
+                    type="email"
+                    v-model="inputEmail"
+                    autocomplete="email"
+                    required
+                />
+            </div>
+
+            <div class="field">
+                <label for="signin-password">Password</label>
+                <input
+                    id="signin-password"
+                    type="password"
+                    v-model="inputPassword"
+                    autocomplete="current-password"
+                    required
+                />
+            </div>
+
+            <p v-if="error" class="error">{{ error }}</p>
+
+            <button type="submit">Sign in</button>
+
+            <p class="footer">
+                Don't have an account?
+                <RouterLink to="/signup">Sign up</RouterLink>
+            </p>
+        </form>
+    </div>
 </template>
 
-<style scoped>
-    .SigninForm {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .SigninForm label {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-    }
-</style>
+<style scoped src="./auth.css"></style>
