@@ -18,7 +18,7 @@ export async function loadUser() {
             return null;
         }
         const data = await res.json();
-        user.value = data.user; // { email, role }
+        user.value = data.user; // { _id, email, role }
         return data.user;
     } catch {
         user.value = null;
