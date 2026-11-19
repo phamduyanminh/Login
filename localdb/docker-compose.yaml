@@ -24,7 +24,21 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-  
+    develop:
+      watch:
+        # Code changes: copy into the running container and restart node
+        - action: sync+restart
+          path: ../backend
+          target: /app
+          ignore:
+            - node_modules/
+            - .env
+        # Dependency changes: rebuild the image
+        - action: rebuild
+          path: ../backend/package.json
+        - action: rebuild
+          path: ../backend/package-lock.json
+
   frontend:
     build: ../frontend
     environment:
@@ -33,6 +47,21 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+    develop:
+      watch:
+        # Code changes: copy into the container, Vite hot-reloads them
+        - action: sync
+          path: ../frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+            - .env
+        # Dependency changes: rebuild the image
+        - action: rebuild
+          path: ../frontend/package.json
+        - action: rebuild
+          path: ../frontend/package-lock.json
 
 volumes:
   mongo-data:
