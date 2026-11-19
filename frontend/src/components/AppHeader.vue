@@ -1,7 +1,9 @@
 <script setup>
+import { useAuth, clearUser } from '@/workers/auth.js';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const { user } = useAuth();
 
 async function signout() {
     try {
@@ -9,6 +11,7 @@ async function signout() {
     } catch (err) {
         console.log('Caught an error: ', err);
     } finally {
+        clearUser();
         router.push('/signin');
     }
 }
@@ -20,7 +23,7 @@ async function signout() {
             <RouterLink to="/home" class="brand">Home</RouterLink>
 
             <div class="links">
-                <RouterLink to="/settings" class="link">Settings</RouterLink>
+                <RouterLink v-if="user?.role === 'admin'" to="/settings" class="link">Settings</RouterLink>
                 <button type="button" @click="signout">Sign out</button>
             </div>
         </nav>

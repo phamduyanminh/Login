@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { loadUser } from "@/workers/auth.js";
 import Signin from "@/views/auth/Signin.vue";
 import Signup from "@/views/auth/Signup.vue";
 import Home from "@/views/home/Home.vue";
@@ -11,18 +12,15 @@ const router = createRouter({
         {path: '/signup', component: Signup},
         {path: '/signin', component: Signin},
         {path: '/home', component: Home, meta: {requiresAuth: true}},
-        {path: '/settings', component: Settings, meta: {requiresAuth: true}}
+        {path: '/settings', component: Settings, meta: {requiresAuth: true, requiresAdmin: true}}
     ]
 });
 
 router.beforeEach(async (to) => {
     if (to.meta.requiresAuth) {
-        try {
-            const res = await fetch('/users/me');
-            if (!res.ok) return 'signin';
-        } catch {
-            return 'signin';
-        }
+        const user = await loadUser();
+        if (!user) return 'signin';
+        if (to.meta.requiresAdmin && user.role !== 'admin') return '/home';
     }
 });
 
