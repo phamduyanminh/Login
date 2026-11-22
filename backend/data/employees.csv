@@ -1,0 +1,26 @@
+ID,First Name,Last Name,Department,Job Title,Salary
+E001,Olivia,Martinez,Engineering,Engineering Manager,145000
+E002,Liam,Nguyen,Engineering,Senior Software Engineer,128000
+E003,Emma,Johnson,Engineering,Software Engineer,102000
+E004,Noah,Kim,Engineering,Software Engineer,98000
+E005,Ava,Patel,Engineering,DevOps Engineer,112000
+E006,Ethan,Brown,Engineering,QA Engineer,85000
+E007,Sophia,Garcia,Engineering,Junior Software Engineer,76000
+E008,Mason,Lee,Sales,Sales Director,138000
+E009,Isabella,Wilson,Sales,Account Executive,82000
+E010,James,Anderson,Sales,Account Executive,79000
+E011,Mia,Thomas,Sales,Sales Development Representative,58000
+E012,Benjamin,Taylor,Sales,Sales Development Representative,56000
+E013,Charlotte,Moore,Marketing,Marketing Manager,110000
+E014,Lucas,Jackson,Marketing,Content Strategist,72000
+E015,Amelia,White,Marketing,SEO Specialist,68000
+E016,Henry,Harris,Marketing,Graphic Designer,65000
+E017,Harper,Clark,Human Resources,HR Manager,98000
+E018,Alexander,Lewis,Human Resources,Recruiter,64000
+E019,Evelyn,Robinson,Human Resources,HR Generalist,61000
+E020,Daniel,Walker,Human Resources,Payroll Specialist,59000
+E021,Abigail,Young,Finance,Finance Director,150000
+E022,Michael,Allen,Finance,Senior Accountant,92000
+E023,Emily,King,Finance,Financial Analyst,84000
+E024,Jacob,Wright,Finance,Accountant,70000
+E025,Ella,Scott,Finance,Accounts Payable Clerk,52000
