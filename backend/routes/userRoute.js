@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/user.model.js';
+import UserRole from '../models/userRole.js';
 import ValidCreateUserInput from '../utils/validCreateUserInput.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 const validator = new ValidCreateUserInput();
@@ -14,29 +17,6 @@ const cookieOptions = {
     secure: false,
     path: '/',
     maxAge: 24 * 60 * 60 * 1000 // 1 day
-}
-
-function requireAuth (req, res, next) {
-    const token = req.cookies?.token;
-    if (!token) return res.status(401).json({error: 'Not Authenticated'});
-    try {
-        req.user = jwt.verify(token, jwt_secret);
-        next();
-    } catch {
-        return res.status(401).json({error: 'Invalid or expired token'});
-    }
-}
-
-function requireRole (...allowedRoles) {
-    return (req, res, next) => {
-        requireAuth (req, res, () => {
-            if (!allowedRoles.includes(req.user.role)) {
-                return res.status(403).json({error: 'Forbidden'});
-            }
-
-            next();
-        });
-    };
 }
 
 // POST sign up
@@ -113,9 +93,63 @@ router.post("/signin", async (req, res) => {
     }
 });
 
-// GET current user
-router.get("/me", requireAuth, (req, res) => {
-    res.json({user: {email: req.user.email, role: req.user.role}});
+// GET current user (role read from the database so role changes show up right away)
+router.get("/me", requireAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId).select('email role');
+        if (!user) {
+            return res.status(401).json({error: 'Not Authenticated'});
+        }
+        return res.json({user: {_id: user._id, email: user.email, role: user.role}});
+    } catch (error) {
+        console.error('Get current user error: ', error);
+        return res.status(500).json({error: 'Could not load the current user!'});
+    }
+});
+
+// GET all users (admin only)
+router.get("/", requireRole(UserRole.ADMIN), async (req, res) => {
+    try {
+        const users = await User.find({}, 'email role').sort({email: 1});
+        return res.json({users});
+    } catch (error) {
+        console.error('List users error: ', error);
+        return res.status(500).json({error: 'Could not load users!'});
+    }
+});
+
+// PATCH a user's role (admin only)
+router.patch("/:id/role", requireRole(UserRole.ADMIN), async (req, res) => {
+    const {id} = req.params;
+    const role = req.body.role;
+
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({error: 'Invalid user id!'});
+    }
+
+    if (!validator.validRoleInput(role)) {
+        return res.status(400).json({error: 'Invalid role!'});
+    }
+
+    // An admin cannot change their own role, so there is always at least one admin left.
+    if (id === String(req.user.userId)) {
+        return res.status(400).json({error: 'You cannot change your own role!'});
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(
+            id,
+            {role},
+            {returnDocument: 'after', runValidators: true, projection: 'email role'}
+        );
+        if (!user) {
+            return res.status(404).json({error: 'User not found!'});
+        }
+        return res.json({user});
+    } catch (error) {
+        console.error('Update role error: ', error);
+        return res.status(500).json({error: 'Could not update the role!'});
+    }
 });
 
 // POST sign out - Clearing cookies
