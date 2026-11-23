@@ -30,9 +30,11 @@ router.patch("/:id", requireRole(UserRole.ADMIN), async (req, res) => {
         return res.status(400).json({error: 'Invalid employee id!'});
     }
 
+    // Express 5 leaves req.body undefined when no JSON body is sent.
+    const body = req.body ?? {};
     const update = {};
     for (const field of TEXT_FIELDS) {
-        const value = req.body[field];
+        const value = body[field];
         if (typeof value !== 'string' || value.trim() === '') {
             return res.status(400).json({error: 'Name, department and job title are required!'});
         }
@@ -42,7 +44,7 @@ router.patch("/:id", requireRole(UserRole.ADMIN), async (req, res) => {
         update[field] = value.trim();
     }
 
-    const salary = req.body.salary;
+    const salary = body.salary;
     if (typeof salary !== 'number' || !Number.isFinite(salary) || salary < 0) {
         return res.status(400).json({error: 'Salary must be a number of 0 or more!'});
     }

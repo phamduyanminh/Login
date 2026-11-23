@@ -19,11 +19,21 @@ const cookieOptions = {
     maxAge: 24 * 60 * 60 * 1000 // 1 day
 }
 
+// MongoDB error code for a duplicate key on a unique index.
+const DUPLICATE_KEY = 11000;
+
+// Express 5 leaves req.body undefined when no JSON body is sent, and a client can
+// send any JSON type, so only a string is treated as an email.
+function readEmail(body) {
+    const value = body?.email;
+    return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
 // POST sign up
 router.post("/signup", async (req, res) => {
-    const email = req.body.email?.trim().toLowerCase();
-    const password = req.body.password;
-    const role = req.body.role;
+    const email = readEmail(req.body);
+    const password = req.body?.password;
+    const role = req.body?.role;
 
     const emailValid = validator.validUsernameInput(email);
     const passwordValid = validator.validPasswordInput(password);
@@ -50,14 +60,20 @@ router.post("/signup", async (req, res) => {
             role: user.role
         });
     } catch (error) {
+        // Two sign-ups with the same email can both pass the check above;
+        // the unique index on email rejects the second one.
+        if (error?.code === DUPLICATE_KEY) {
+            return res.status(409).json({error: 'Email is already existed!'});
+        }
+        console.error('Sign-up error: ', error);
         return res.status(500).json({error: 'Could not sign up the account!'})
     }
 });
 
-// POST sign in 
+// POST sign in
 router.post("/signin", async (req, res) => {
-    const email = req.body.email?.trim().toLowerCase();
-    const password = req.body.password;
+    const email = readEmail(req.body);
+    const password = req.body?.password;
 
     const emailValid = validator.validUsernameInput(email);
     const passwordValid = validator.validPasswordInput(password);
@@ -121,7 +137,7 @@ router.get("/", requireRole(UserRole.ADMIN), async (req, res) => {
 // PATCH a user's role (admin only)
 router.patch("/:id/role", requireRole(UserRole.ADMIN), async (req, res) => {
     const {id} = req.params;
-    const role = req.body.role;
+    const role = req.body?.role;
 
     if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({error: 'Invalid user id!'});
@@ -154,8 +170,7 @@ router.patch("/:id/role", requireRole(UserRole.ADMIN), async (req, res) => {
 
 // DELETE a user by email (admin only). The email is sent in the body so it stays out of URLs and logs.
 router.delete("/", requireRole(UserRole.ADMIN), async (req, res) => {
-    const rawEmail = req.body?.email;
-    const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
+    const email = readEmail(req.body);
     if (!validator.validUsernameInput(email)) {
         return res.status(400).json({error: 'Invalid email!'});
     }

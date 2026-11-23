@@ -4,8 +4,10 @@ class validCreateUserInput {
     static VALLID_EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     static VALID_PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 
+    // Each check requires a string: the body is client JSON, and a regex test would
+    // otherwise coerce arrays and numbers (["Abc123"] passes as "Abc123").
     validUsernameInput (email) {
-        if (!email) {
+        if (typeof email !== 'string' || !email) {
             console.error('Username is required');
             return false;
         }
@@ -18,7 +20,7 @@ class validCreateUserInput {
     }
 
     validPasswordInput (password) {
-        if (!password) {
+        if (typeof password !== 'string' || !password) {
             console.error('Password is required');
             return false;
         }
@@ -31,7 +33,7 @@ class validCreateUserInput {
     }
 
     validRoleInput (role) {
-        if (!role) {
+        if (typeof role !== 'string' || !role) {
             console.error('User role is required');
             return false;
         }
