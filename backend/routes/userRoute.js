@@ -152,6 +152,31 @@ router.patch("/:id/role", requireRole(UserRole.ADMIN), async (req, res) => {
     }
 });
 
+// DELETE a user by email (admin only). The email is sent in the body so it stays out of URLs and logs.
+router.delete("/", requireRole(UserRole.ADMIN), async (req, res) => {
+    const rawEmail = req.body?.email;
+    const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
+    if (!validator.validUsernameInput(email)) {
+        return res.status(400).json({error: 'Invalid email!'});
+    }
+
+    // An admin cannot delete their own account, so there is always at least one admin left.
+    if (email === req.user.email) {
+        return res.status(400).json({error: 'You cannot delete your own account!'});
+    }
+
+    try {
+        const deleted = await User.findOneAndDelete({email});
+        if (!deleted) {
+            return res.status(404).json({error: 'User not found!'});
+        }
+        return res.json({message: 'User deleted', user: {email: deleted.email}});
+    } catch (error) {
+        console.error('Delete user error: ', error);
+        return res.status(500).json({error: 'Could not delete the user!'});
+    }
+});
+
 // POST sign out - Clearing cookies
 router.post("/signout", (req, res) => {
     res.clearCookie('token', cookieOptions);
