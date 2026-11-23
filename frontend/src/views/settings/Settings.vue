@@ -10,7 +10,9 @@ const { user: currentUser } = useAuth();
 const users = ref([]);
 const loading = ref(true);
 const error = ref('');
-const savingId = ref(null);
+// Rows with a role change in flight: { [userId]: true }. One entry per row, so
+// finishing one save never clears another row's "Saving…" state.
+const saving = ref({});
 const rowError = ref({}); // { [userId]: message }
 const savedId = ref(null);
 
@@ -42,7 +44,7 @@ async function changeRole(u, event) {
     const oldRole = u.role;
     if (newRole === oldRole) return;
 
-    savingId.value = u._id;
+    saving.value = { ...saving.value, [u._id]: true };
     savedId.value = null;
     rowError.value = { ...rowError.value, [u._id]: '' };
     u.role = newRole;
@@ -68,7 +70,8 @@ async function changeRole(u, event) {
         event.target.value = oldRole;
         rowError.value = { ...rowError.value, [u._id]: 'Could not reach the server.' };
     } finally {
-        savingId.value = null;
+        const { [u._id]: _done, ...stillSaving } = saving.value;
+        saving.value = stillSaving;
     }
 }
 
@@ -109,7 +112,7 @@ onMounted(loadUsers);
                                 <td class="role-col">
                                     <select
                                         :value="u.role"
-                                        :disabled="isSelf(u) || savingId === u._id"
+                                        :disabled="isSelf(u) || saving[u._id]"
                                         :title="isSelf(u) ? 'You cannot change your own role' : ''"
                                         :aria-label="`Role for ${u.email}`"
                                         @change="changeRole(u, $event)"
@@ -118,7 +121,7 @@ onMounted(loadUsers);
                                             {{ r === 'admin' ? 'Admin' : 'User' }}
                                         </option>
                                     </select>
-                                    <span v-if="savingId === u._id" class="status muted">Saving…</span>
+                                    <span v-if="saving[u._id]" class="status muted">Saving…</span>
                                     <span v-else-if="savedId === u._id" class="status saved">Saved</span>
                                     <p v-if="rowError[u._id]" class="error row-error">{{ rowError[u._id] }}</p>
                                 </td>

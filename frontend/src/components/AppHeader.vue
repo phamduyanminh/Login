@@ -1,18 +1,31 @@
 <script setup>
+import { ref } from 'vue';
 import { useAuth, clearUser } from '@/workers/auth.js';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const { user } = useAuth();
+const signingOut = ref(false);
+const signoutError = ref('');
 
+// The login cookie is httpOnly, so only the server can clear it. Leave the page
+// only once it has; otherwise the user would still be signed in.
 async function signout() {
+    signingOut.value = true;
+    signoutError.value = '';
     try {
-        await fetch('/users/signout', { method: 'POST' });
-    } catch (err) {
-        console.log('Caught an error: ', err);
-    } finally {
+        const res = await fetch('/users/signout', { method: 'POST' });
+        if (!res.ok) {
+            signoutError.value = 'Could not sign out. Try again.';
+            return;
+        }
         clearUser();
         router.push('/signin');
+    } catch (err) {
+        console.log('Caught an error: ', err);
+        signoutError.value = 'Cannot reach the server. Try again.';
+    } finally {
+        signingOut.value = false;
     }
 }
 </script>
@@ -24,7 +37,10 @@ async function signout() {
 
             <div class="links">
                 <RouterLink v-if="user?.role === 'admin'" to="/settings" class="link">Settings</RouterLink>
-                <button type="button" @click="signout">Sign out</button>
+                <span v-if="signoutError" class="error" role="alert">{{ signoutError }}</span>
+                <button type="button" :disabled="signingOut" @click="signout">
+                    {{ signingOut ? 'Signing out…' : 'Sign out' }}
+                </button>
             </div>
         </nav>
     </header>
@@ -90,5 +106,15 @@ button {
 
 button:hover {
     background: #111;
+}
+
+button:disabled {
+    background: #888;
+    cursor: not-allowed;
+}
+
+.error {
+    font-size: 13px;
+    color: #c0392b;
 }
 </style>

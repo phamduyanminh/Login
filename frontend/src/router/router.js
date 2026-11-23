@@ -19,7 +19,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
     if (to.meta.requiresAuth) {
         const user = await loadUser();
-        if (!user) return 'signin';
+        if (!user) return '/signin';
         if (to.meta.requiresAdmin && user.role !== 'admin') return '/home';
     }
 });
