@@ -61,6 +61,16 @@ test.describe('POST /users/signup', () => {
         expect(await again.json()).toEqual({ error: 'Email is already existed!' });
     });
 
+    test('creates one account when the same email signs up at the same time', async ({ request }) => {
+        // All requests can pass the "email already used" check before any insert,
+        // so the unique index decides. The losers must get 409, not 500.
+        const responses = await Promise.all(
+            Array.from({ length: 5 }, () => signUp(request, PLAYWRIGHT_USER))
+        );
+        const statuses = responses.map((res) => res.status()).sort();
+        expect(statuses).toEqual([201, 409, 409, 409, 409]);
+    });
+
     test('rejects an invalid email', async ({ request }) => {
         for (const email of ['', 'not-an-email', 'missing@domain']) {
             const res = await signUp(request, { ...PLAYWRIGHT_USER, email });
